@@ -25,6 +25,24 @@ module.exports = function buildCommit(answers) {
     return subject.trim();
   }
 
+  function addJiraIssues(issues) {
+    return issues.trim() + ' ';
+  }
+
+  function addJiraSmartCommands(answers) {
+    return filter([
+      answers.workflow ? '#' + answers.workflow : undefined,
+      answers.time ? '#time ' + answers.time : undefined,
+      answers.comment ? '#comment ' + answers.comment : undefined,
+    ]).join(' ');
+  }
+
+  function filter(array) {
+    return array.filter(function(item) {
+      return !!item;
+    });
+  }
+
   function escapeSpecialChars(result) {
     var specialChars = ['\`'];
 
@@ -38,7 +56,11 @@ module.exports = function buildCommit(answers) {
   }
 
   // Hard limit this line
-  var head = (answers.type + addScope(answers.scope) + addSubject(answers.subject)).slice(0, maxLineWidth);
+  var head = (answers.type + addScope(answers.scope) + (answers.useJira === "yes" ? addJiraIssues(answers.issues) : '') + addSubject(answers.subject)).slice(0, maxLineWidth);
+  if (answers.useJira === "yes")
+  {
+    head += addJiraSmartCommands(answers);
+  }
 
   // Wrap these lines at 100 characters
   var body = wrap(answers.body, wrapOptions) || '';

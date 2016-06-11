@@ -78,6 +78,66 @@ module.exports = {
         }
       },
       {
+        type: 'expand',
+        name: 'useJira',
+        choices: [
+          { key: 'n', name: 'No', value: 'no' },
+          { key: 'y', name: 'Yes', value: 'yes' },
+        ],
+        message: function(answers) {
+          return 'Do you sure you want to specify Jira Smart Commmits?';
+        },
+        when: function (answers) {
+            return config.jiraSmartCommits;
+        }
+      },
+      {
+        type: 'input',
+        name: 'issues',
+        message: 'Jira Issue ID(s) (required). E.g.: JIR-1 JIR-20:\n',
+        when: function (answers) {
+            return config.jiraSmartCommits && answers.useJira === "yes";
+        },
+        validate: function(input) {
+          if (!input) {
+            return 'Must specify issue IDs, otherwise, just use a normal commit message';
+          } else {
+            return true;
+          }
+        }
+      },
+      {
+        type: 'input',
+        name: 'workflow',
+        message: 'Workflow command (testing, closed, etc.) (optional):\n',
+        when: function (answers) {
+            return config.jiraSmartCommits && answers.useJira === "yes";
+        },
+        validate: function(input) {
+          if (input && input.indexOf(' ') !== -1) {
+            return 'Workflows cannot have spaces in smart commits. If your workflow name has a space, use a dash (-)';
+          } else {
+            return true;
+          }
+        }
+      },
+      {
+        type: 'input',
+        name: 'time',
+        message: 'Time spent (i.e. 3h 15m) (optional):\n',
+        when: function (answers) {
+            return config.jiraSmartCommits && answers.useJira === "yes";
+        }
+      },
+      {
+        type: 'input',
+        name: 'comment',
+        message: 'Jira comment (optional):\n',
+        when: function (answers) {
+            return config.jiraSmartCommits && answers.useJira === "yes";
+        }
+      },
+      {
         type: 'input',
         name: 'body',
         message: 'Provide a LONGER description of the change (optional). Use "|" to break new line:\n'
@@ -96,7 +156,7 @@ module.exports = {
       {
         type: 'input',
         name: 'footer',
-        message: 'List any ISSUES CLOSED by this change (optional). E.g.: #31, #34:\n',
+        message: 'List any ISSUES CLOSED by this change (optional). E.g.: JIR-31 JIR-34:\n',
         when: isNotWip
       },
       {
@@ -113,8 +173,8 @@ module.exports = {
           return 'Are you sure you want to proceed with the commit above?';
         }
       }
-    ];
-
+    ]
+    
     return questions;
   }
 };
